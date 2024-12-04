@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "259062997493",
+    "firebase_url": "https://invoicing-ee26d-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "invoicing-ee26d",
+    "storage_bucket": "invoicing-ee26d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:259062997493:android:6c260d21f404cc6f0040bc",
+        "android_client_info": {
+          "package_name": "com.erp.salespurchase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBw0NFmRH805bf9LM6U_B09BDJCo5gNJMU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
