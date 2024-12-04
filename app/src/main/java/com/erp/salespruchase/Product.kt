@@ -1,8 +1,9 @@
 package com.erp.salespruchase
 
 data class Product(
+    val id: String = "",
     val name: String = "",
-    val price: Int = 0,
+    val price: Double = 0.0,
     val stock: Int = 0,
     val unit: String = "",
     val category: String = ""
