@@ -19,5 +19,6 @@ fun AppNavigation() {
             )
         }
         composable("product_management") { ProductManagementScreen() }
+        composable("customer_management") { CustomerManagementScreen() }
     }
 }

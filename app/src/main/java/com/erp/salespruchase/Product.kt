@@ -10,10 +10,12 @@ data class Product(
 )
 
 data class Customer(
+    val id: String = "",
     val name: String = "",
     val phone: String = "",
     val address: String = ""
 )
+
 
 data class Sale(
     val customerId: String = "",
