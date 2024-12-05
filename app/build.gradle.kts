@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.erp.salespruchase"
+    namespace = "com.erp.salespurchase"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.erp.salespruchase"
+        applicationId = "com.erp.salespurchase"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -81,10 +81,10 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
 
-    implementation(libs.androidx.hilt.lifecycle.viewmodel)
-    kapt("androidx.hilt:hilt-compiler:1.2.0")
+//    implementation(libs.androidx.hilt.lifecycle.viewmodel)
+//    kapt(libs.androidx.hilt.compiler)
 
-    implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
+    implementation (libs.androidx.hilt.navigation.compose)
 
 }
 
