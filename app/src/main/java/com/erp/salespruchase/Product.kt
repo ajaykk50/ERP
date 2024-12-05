@@ -17,6 +17,15 @@ data class Customer(
 )
 
 
+//data class Sale(
+//    val id: String = "",
+//    val customerId: String = "",
+//    val productId: String = "",
+//    val quantity: Int = 0,
+//    val totalAmount: Double = 0.0,
+//    val date: Long = 0L
+//)
+
 data class Sale(
     val id: String = "",
     val customerId: String = "",
@@ -25,7 +34,6 @@ data class Sale(
     val totalAmount: Double = 0.0,
     val date: Long = 0L
 )
-
 data class Vendor(
     val id: String = "",
     val name: String = "",

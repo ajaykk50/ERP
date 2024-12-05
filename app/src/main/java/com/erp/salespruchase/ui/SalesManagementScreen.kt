@@ -41,11 +41,8 @@ fun SalesManagementScreen(
     val customers by viewModel.customers.collectAsState(emptyList())
     val products by viewModel.products.collectAsState(emptyList())
     val selectedCustomer by viewModel.selectedCustomer.collectAsState()
-    val selectedProduct by viewModel.selectedProduct.collectAsState()
     val selectedProducts by viewModel.selectedProducts.collectAsState()
-
-    val quantity by viewModel.quantity.collectAsState()
-    val totalPrice by viewModel.totalPrice.collectAsState()
+    val totalAmount by viewModel.totalAmount.collectAsState()
     val context = LocalContext.current
 
     Scaffold(
@@ -77,77 +74,34 @@ fun SalesManagementScreen(
                     }
                 )
 
-                // Select Product
-                DropdownMenu(
-                    label = "Select Product",
-                    options = products.map { it.name },
-                    selectedOption = "", // No product selected initially
-                    onOptionSelected = { name ->
-                        val product = products.find { it.name == name }
-                        product?.let { viewModel.addProduct(it) }
+                // Searchable Dropdown for Products
+                SearchableDropdown(
+                    label = "Select Products",
+                    options = products,
+                    selectedOptions = selectedProducts,
+                    onOptionSelected = { product ->
+                        viewModel.addProduct(product)
+                    },
+                    onOptionRemoved = { product ->
+                        viewModel.removeProduct(product)
                     }
                 )
 
-
-                // Add Multiple Products
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    items(selectedProducts) { selectedProduct ->
-                        ProductRow(
-                            product = selectedProduct,
-                            onQuantityChanged = { quantity ->
-                                viewModel.updateQuantityForProduct(selectedProduct.id, quantity)
-                            },
-                            onPriceChanged = { price ->
-                                viewModel.updatePriceForProduct(selectedProduct.id, price)
-                            },
-                            onRemoveProduct = {
-                                viewModel.removeProduct(selectedProduct.id)
-                            }
-                        )
-                    }
-                }
-                Button(
-                    onClick = { viewModel.addProduct() },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Add Product")
+                // Display Selected Products with Quantities
+                selectedProducts.forEach { (product, quantity) ->
+                    ProductQuantityItem(
+                        product = product,
+                        quantity = quantity,
+                        onQuantityChanged = { newQuantity ->
+                            viewModel.updateProductQuantity(product, newQuantity)
+                        }
+                    )
                 }
 
-//                // Select Product
-//                DropdownMenu(
-//                    label = "Select Product",
-//                    options = products.map { it.name },
-//                    selectedOption = selectedProduct?.name ?: "",
-//                    onOptionSelected = { name ->
-//                        viewModel.selectProduct(products.find { it.name == name })
-//                    }
-//                )
-//
-//                // Enter Quantity
-//                TextField(
-//                    value = quantity.toString(),
-//                    onValueChange = { viewModel.updateQuantity(it.toIntOrNull() ?: 0) },
-//                    label = { Text("Enter Quantity") },
-//                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-//
-//                // Edit Price
-//                TextField(
-//                    value = selectedProduct?.price?.toString() ?: "",
-//                    onValueChange = { viewModel.updatePrice(it.toDoubleOrNull() ?: 0.0) },
-//                    label = { Text("Price per Unit") },
-//                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-//                    modifier = Modifier.fillMaxWidth()
-//                )
-
-                // Display Total Price
+                // Total Amount
                 Text(
-                    text = "Total: $totalPrice",
-                    style = MaterialTheme.typography.bodySmall,
+                    text = "Total Amount: $totalAmount",
+                    style = MaterialTheme.typography.h6,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -172,38 +126,3 @@ fun SalesManagementScreen(
     )
 }
 
-@Composable
-fun ProductRow(
-    product: SelectedProduct,
-    onQuantityChanged: (Int) -> Unit,
-    onPriceChanged: (Double) -> Unit,
-    onRemoveProduct: () -> Unit
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(text = product.name, style = MaterialTheme.typography.titleMedium)
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            TextField(
-                value = product.quantity.toString(),
-                onValueChange = { onQuantityChanged(it.toIntOrNull() ?: 0) },
-                label = { Text("Quantity") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.weight(1f)
-            )
-            TextField(
-                value = product.price.toString(),
-                onValueChange = { onPriceChanged(it.toDoubleOrNull() ?: 0.0) },
-                label = { Text("Price per Unit") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.weight(1f)
-            )
-            IconButton(onClick = { onRemoveProduct() }) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = "Remove Product")
-            }
-        }
-    }
-}

@@ -34,94 +34,55 @@ class SalesViewModel @Inject constructor(
     private val _selectedCustomer = MutableStateFlow<Customer?>(null)
     val selectedCustomer: StateFlow<Customer?> = _selectedCustomer
 
-    private val _selectedProduct = MutableStateFlow<Product?>(null)
-    val selectedProduct: StateFlow<Product?> = _selectedProduct
+    private val _selectedProducts = MutableStateFlow<Map<Product, Int>>(emptyMap())
+    val selectedProducts: StateFlow<Map<Product, Int>> = _selectedProducts
 
-    private val _selectedProducts = MutableStateFlow<List<SelectedProduct>>(emptyList())
-    val selectedProducts: StateFlow<List<SelectedProduct>> = _selectedProducts
-
-    val totalPrice = selectedProducts.map { products ->
-        products.sumOf { it.quantity * it.price }
+    val totalAmount = _selectedProducts.map { products ->
+        products.entries.sumOf { (product, quantity) -> product.price * quantity }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, 0.0)
-
-    private val _quantity = MutableStateFlow(0)
-    val quantity: StateFlow<Int> = _quantity
-
-//    val totalPrice = selectedProduct.combine(quantity) { product, quantity ->
-//        product?.price?.times(quantity) ?: 0.0
-//    }.stateIn(viewModelScope, SharingStarted.Eagerly, 0.0)
 
     fun selectCustomer(customer: Customer?) {
         _selectedCustomer.value = customer
     }
 
-    fun selectProduct(product: Product?) {
-        _selectedProduct.value = product
-    }
-
-    fun updateQuantity(newQuantity: Int) {
-        _quantity.value = newQuantity
-    }
-
-    fun updatePrice(newPrice: Double) {
-        _selectedProduct.value = _selectedProduct.value?.copy(price = newPrice)
-    }
-
-     fun addProduct() {
-         viewModelScope.launch {
-             val firstProduct = products.firstOrNull()
-             _selectedProducts.value += SelectedProduct(
-                 id = firstProduct?.firstOrNull()?.id!!,
-                 name = firstProduct.firstOrNull()?.name!!,
-                 quantity = 0,
-                 price = firstProduct.firstOrNull()?.price!!
-             )
-         }
-    }
-
     fun addProduct(product: Product) {
-        val selectedProduct = SelectedProduct(
-            id = product.id,
-            name = product.name,
-            quantity = 0,
-            price = product.price
-        )
-        _selectedProducts.value = _selectedProducts.value + selectedProduct
-    }
-
-    fun updateQuantityForProduct(productId: String, quantity: Int) {
-        _selectedProducts.value = _selectedProducts.value.map {
-            if (it.id == productId) it.copy(quantity = quantity) else it
+        _selectedProducts.value = _selectedProducts.value.toMutableMap().apply {
+            put(product, 1)
         }
     }
 
-    fun updatePriceForProduct(productId: String, price: Double) {
-        _selectedProducts.value = _selectedProducts.value.map {
-            if (it.id == productId) it.copy(price = price) else it
+    fun removeProduct(product: Product) {
+        _selectedProducts.value = _selectedProducts.value.toMutableMap().apply {
+            remove(product)
         }
     }
 
-    fun removeProduct(productId: String) {
-        _selectedProducts.value = _selectedProducts.value.filter { it.id != productId }
+    fun updateProductQuantity(product: Product, quantity: Int) {
+        _selectedProducts.value = _selectedProducts.value.toMutableMap().apply {
+            this[product] = quantity
+        }
     }
 
     fun saveSale(onSuccess: () -> Unit, onError: () -> Unit) {
         val customer = _selectedCustomer.value
-        val product = _selectedProduct.value
-        val quantity = _quantity.value
+        val products = _selectedProducts.value
 
-        if (customer != null && product != null && quantity > 0) {
-            val sale = Sale(
-                id = UUID.randomUUID().toString(),
-                customerId = customer.id,
-                productId = product.id,
-                quantity = quantity,
-                totalAmount = product.price * quantity,
-                date = System.currentTimeMillis()
-            )
+        if (customer != null && products.isNotEmpty()) {
+            val salesList = products.map { (product, quantity) ->
+                Sale(
+                    id = UUID.randomUUID().toString(),
+                    customerId = customer.id,
+                    productId = product.id,
+                    quantity = quantity,
+                    totalAmount = product.price * quantity,
+                    date = System.currentTimeMillis()
+                )
+            }
 
-            salesRepository.addSale(sale, onSuccess = {
-                productRepository.updateStock(product.id, product.stock - quantity)
+            salesRepository.addSales(salesList, onSuccess = {
+                salesList.forEach { sale ->
+                    productRepository.updateStock(sale.productId, -sale.quantity)
+                }
                 onSuccess()
             }, onError)
         } else {
@@ -129,3 +90,4 @@ class SalesViewModel @Inject constructor(
         }
     }
 }
+

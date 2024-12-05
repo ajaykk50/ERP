@@ -9,8 +9,9 @@ class SalesRepository @Inject constructor(
 ) {
     private val salesRef = firebaseDatabase.getReference("sales")
 
-    fun addSale(sale: Sale, onSuccess: () -> Unit, onError: () -> Unit) {
-        salesRef.child(sale.id).setValue(sale)
+    fun addSales(sales: List<Sale>, onSuccess: () -> Unit, onError: () -> Unit) {
+        val updates = sales.associate { it.id to it }
+        salesRef.updateChildren(updates)
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener { onError() }
     }
