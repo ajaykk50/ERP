@@ -39,4 +39,11 @@ class ProductRepository @Inject constructor(
     fun deleteProduct(productId: String) {
         productRef.child(productId).removeValue()
     }
+
+    fun updateStock(productId: String, newStock: Int, onSuccess: () -> Unit = {}, onError: (Exception) -> Unit = {}) {
+        productRef.child(productId).child("stock").setValue(newStock)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onError(it) }
+    }
+
 }

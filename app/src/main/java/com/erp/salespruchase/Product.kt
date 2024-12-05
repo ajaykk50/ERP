@@ -1,5 +1,7 @@
 package com.erp.salespruchase
 
+import java.util.UUID
+
 data class Product(
     val id: String = "",
     val name: String = "",
@@ -18,9 +20,43 @@ data class Customer(
 
 
 data class Sale(
+    val id: String = "",
     val customerId: String = "",
     val productId: String = "",
     val quantity: Int = 0,
-    val date: String = ""
+    val totalAmount: Double = 0.0,
+    val date: Long = 0L
 )
+
+data class Vendor(
+    val id: String = "",
+    val name: String = "",
+    val phone: String = "",
+    val address: String = ""
+)
+
+data class Purchase(
+    val id: String = "",
+    val productId: String,
+    val vendorId: String,
+    val quantity: Int,
+    val date: Long
+)
+
+data class SelectedProduct(
+    val id: String = "",
+    val name: String = "",
+    val quantity: Int = 0,
+    val price: Double = 0.0
+)
+
+data class Expense(
+    val id: String = UUID.randomUUID().toString(),
+    val name: String,
+    val amount: Double,
+    val date: Long
+)
+
+
+
 
