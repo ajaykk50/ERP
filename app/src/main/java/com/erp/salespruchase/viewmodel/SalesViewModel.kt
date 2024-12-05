@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.erp.salespruchase.Customer
 import com.erp.salespruchase.Product
 import com.erp.salespruchase.Sale
+import com.erp.salespruchase.SaleItem
 import com.erp.salespruchase.SelectedProduct
 import com.erp.salespruchase.repository.CustomerRepository
 import com.erp.salespruchase.repository.ProductRepository
@@ -34,54 +35,61 @@ class SalesViewModel @Inject constructor(
     private val _selectedCustomer = MutableStateFlow<Customer?>(null)
     val selectedCustomer: StateFlow<Customer?> = _selectedCustomer
 
-    private val _selectedProducts = MutableStateFlow<Map<Product, Int>>(emptyMap())
-    val selectedProducts: StateFlow<Map<Product, Int>> = _selectedProducts
+    private val _selectedProduct = MutableStateFlow<Product?>(null)
+    val selectedProduct: StateFlow<Product?> = _selectedProduct
 
-    val totalAmount = _selectedProducts.map { products ->
-        products.entries.sumOf { (product, quantity) -> product.price * quantity }
+    private val _quantity = MutableStateFlow(0)
+    val quantity: StateFlow<Int> = _quantity
+
+    private val _productSearchQuery = MutableStateFlow("")
+    val productSearchQuery: StateFlow<String> = _productSearchQuery
+
+    private val _saleItems = MutableStateFlow<List<SaleItem>>(emptyList())
+    val saleItems: StateFlow<List<SaleItem>> = _saleItems
+
+    val totalPrice = _saleItems.combine(_selectedProduct) { saleItems, selectedProduct ->
+        saleItems.sumOf { it.product.price * it.quantity } + (selectedProduct?.price ?: 0.0 * _quantity.value)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, 0.0)
 
     fun selectCustomer(customer: Customer?) {
         _selectedCustomer.value = customer
     }
 
-    fun addProduct(product: Product) {
-        _selectedProducts.value = _selectedProducts.value.toMutableMap().apply {
-            put(product, 1)
-        }
+    fun selectProduct(product: Product?) {
+        _selectedProduct.value = product
     }
 
-    fun removeProduct(product: Product) {
-        _selectedProducts.value = _selectedProducts.value.toMutableMap().apply {
-            remove(product)
-        }
+    fun updateQuantity(newQuantity: Int) {
+        _quantity.value = newQuantity
     }
 
-    fun updateProductQuantity(product: Product, quantity: Int) {
-        _selectedProducts.value = _selectedProducts.value.toMutableMap().apply {
-            this[product] = quantity
-        }
+    fun updateProductSearchQuery(query: String) {
+        _productSearchQuery.value = query
+    }
+
+    fun addProductToSale(product: Product, quantity: Int) {
+        val newSaleItem = SaleItem(product, quantity)
+        _saleItems.value = _saleItems.value + newSaleItem
     }
 
     fun saveSale(onSuccess: () -> Unit, onError: () -> Unit) {
         val customer = _selectedCustomer.value
-        val products = _selectedProducts.value
+        val saleItems = _saleItems.value
+        if (customer != null && saleItems.isNotEmpty()) {
+            val saleId = UUID.randomUUID().toString()
+            val sale = Sale(
+                id = saleId,
+                customerId = customer.id,
+                saleItems = saleItems.map { it.product.id to it.quantity },
+                totalAmount = saleItems.sumOf { it.product.price * it.quantity },
+                date = System.currentTimeMillis()
+            )
 
-        if (customer != null && products.isNotEmpty()) {
-            val salesList = products.map { (product, quantity) ->
-                Sale(
-                    id = UUID.randomUUID().toString(),
-                    customerId = customer.id,
-                    productId = product.id,
-                    quantity = quantity,
-                    totalAmount = product.price * quantity,
-                    date = System.currentTimeMillis()
-                )
-            }
-
-            salesRepository.addSales(salesList, onSuccess = {
-                salesList.forEach { sale ->
-                    productRepository.updateStock(sale.productId, -sale.quantity)
+            // Save sale
+            salesRepository.addSales(sale, onSuccess = {
+                // Update product stock after sale
+                saleItems.forEach { saleItem ->
+                    productRepository.updateStock(saleItem.product.id, saleItem.product.stock - saleItem.quantity)
                 }
                 onSuccess()
             }, onError)
@@ -90,4 +98,3 @@ class SalesViewModel @Inject constructor(
         }
     }
 }
-

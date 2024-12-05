@@ -41,8 +41,11 @@ fun SalesManagementScreen(
     val customers by viewModel.customers.collectAsState(emptyList())
     val products by viewModel.products.collectAsState(emptyList())
     val selectedCustomer by viewModel.selectedCustomer.collectAsState()
-    val selectedProducts by viewModel.selectedProducts.collectAsState()
-    val totalAmount by viewModel.totalAmount.collectAsState()
+    val selectedProduct by viewModel.selectedProduct.collectAsState()
+    val quantity by viewModel.quantity.collectAsState()
+    val totalPrice by viewModel.totalPrice.collectAsState()
+    val saleItems by viewModel.saleItems.collectAsState()
+    val productSearchQuery by viewModel.productSearchQuery.collectAsState()
     val context = LocalContext.current
 
     Scaffold(
@@ -74,38 +77,70 @@ fun SalesManagementScreen(
                     }
                 )
 
-                // Searchable Dropdown for Products
-                SearchableDropdown(
-                    label = "Select Products",
-                    options = products,
-                    selectedOptions = selectedProducts,
-                    onOptionSelected = { product ->
-                        viewModel.addProduct(product)
-                    },
-                    onOptionRemoved = { product ->
-                        viewModel.removeProduct(product)
-                    }
-                )
-
-                // Display Selected Products with Quantities
-                selectedProducts.forEach { (product, quantity) ->
-                    ProductQuantityItem(
-                        product = product,
-                        quantity = quantity,
-                        onQuantityChanged = { newQuantity ->
-                            viewModel.updateProductQuantity(product, newQuantity)
-                        }
-                    )
-                }
-
-                // Total Amount
-                Text(
-                    text = "Total Amount: $totalAmount",
-                    style = MaterialTheme.typography.h6,
+                // Search Product
+                TextField(
+                    value = productSearchQuery,
+                    onValueChange = { viewModel.updateProductSearchQuery(it) },
+                    label = { Text("Search Product") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Save Button
+                // Product Dropdown based on search query
+                val filteredProducts = products.filter { it.name.contains(productSearchQuery, ignoreCase = true) }
+//                DropdownMenu(
+//                    label = "Select Product",
+//                    options = filteredProducts.map { it.name },
+//                    selectedOption = selectedProduct?.name ?: "",
+//                    onOptionSelected = { name ->
+//                        viewModel.selectProduct(filteredProducts.find { it.name == name })
+//                    }
+//                )
+
+                SearchableDropdownMenu(
+                    label = "Select Product",
+                    options = products.map { it.name },
+                    selectedOption = selectedProduct?.name ?: "",
+                    onOptionSelected = { name ->
+                        viewModel.selectProduct(products.find { it.name == name })
+                    }
+                )
+
+                // Enter Quantity
+                TextField(
+                    value = quantity.toString(),
+                    onValueChange = { viewModel.updateQuantity(it.toIntOrNull() ?: 0) },
+                    label = { Text("Enter Quantity") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // Add Product to Sale
+                Button(
+                    onClick = {
+                        selectedProduct?.let { product ->
+                            viewModel.addProductToSale(product, quantity)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Add Product to Sale")
+                }
+
+                // Sale Items Summary
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    saleItems.forEach { saleItem ->
+                        Text("${saleItem.product.name}: ${saleItem.quantity} x ${saleItem.product.price}")
+                    }
+                }
+
+                // Display Total Price
+                Text(
+                    text = "Total: $totalPrice",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // Save Sale Button
                 Button(
                     onClick = {
                         viewModel.saveSale(
@@ -125,4 +160,3 @@ fun SalesManagementScreen(
         }
     )
 }
-
