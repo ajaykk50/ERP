@@ -1,7 +1,5 @@
 package com.erp.salespruchase
 
-import java.util.UUID
-
 data class Product(
     val id: String = "",
     val name: String = "",
@@ -51,10 +49,10 @@ data class SelectedProduct(
 )
 
 data class Expense(
-    val id: String = UUID.randomUUID().toString(),
-    val name: String,
-    val amount: Double,
-    val date: Long
+    val id: String = "",
+    val name: String = "",
+    val amount: Double = 0.0,
+    val date: Long = 0L
 )
 
 

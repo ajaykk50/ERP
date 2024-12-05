@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -31,55 +32,68 @@ fun HomeScreen(
             TopAppBar(title = { Text("Management Dashboard") })
         }
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            ManagementCard(
-                title = "Product Management",
-                description = "Add, edit, and view products",
-                icon = Icons.Default.ShoppingCart,
-                onClick = onProductClick
-            )
+            item {
+                ManagementCard(
+                    title = "Product Management",
+                    description = "Add, edit, and view products",
+                    icon = Icons.Default.ShoppingCart,
+                    onClick = onProductClick
+                )
 
-            ManagementCard(
-                title = "Customer Management",
-                description = "Add, edit, and view customers",
-                icon = Icons.Default.Person,
-                onClick = onCustomerClick
-            )
-
-            ManagementCard(
-                title = "Vendor Management",
-                description = "Add, edit, and view customers",
-                icon = Icons.Default.Person,
-                onClick = onVendorClick
-            )
+            }
+            item {
+                ManagementCard(
+                    title = "Customer Management",
+                    description = "Add, edit, and view customers",
+                    icon = Icons.Default.Person,
+                    onClick = onCustomerClick
+                )
+            }
+            item {
 
 
-            ManagementCard(
-                title = "Sales Management",
-                description = "Create and track sales",
-                icon = Icons.Default.Person,
-                onClick = onSalesClick
-            )
+                ManagementCard(
+                    title = "Vendor Management",
+                    description = "Add, edit, and view customers",
+                    icon = Icons.Default.Person,
+                    onClick = onVendorClick
+                )
+            }
 
-            ManagementCard(
-                title = "Purchase Management",
-                description = "Track product purchases",
-                icon = Icons.Default.Person,
-                onClick = onPurchaseClick
-            )
 
-            ManagementCard(
-                title = "Expense Management",
-                description = "Add and view expenses",
-                icon = Icons.Default.Person,
-                onClick = onExpenseClick
-            )
+            item {
+                ManagementCard(
+                    title = "Sales Management",
+                    description = "Create and track sales",
+                    icon = Icons.Default.Person,
+                    onClick = onSalesClick
+                )
+            }
+
+            item {
+                ManagementCard(
+                    title = "Purchase Management",
+                    description = "Track product purchases",
+                    icon = Icons.Default.Person,
+                    onClick = onPurchaseClick
+                )
+            }
+
+            item {
+                ManagementCard(
+                    title = "Expense Management",
+                    description = "Add and view expenses",
+                    icon = Icons.Default.Person,
+                    onClick = onExpenseClick
+                )
+            }
         }
     }
 }

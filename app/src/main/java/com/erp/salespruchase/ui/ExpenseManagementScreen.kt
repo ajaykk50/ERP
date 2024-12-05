@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +60,10 @@ fun ExpenseManagementScreen(
     val date by viewModel.date.collectAsState(0L)
     val expenses by viewModel.expenses.collectAsState(emptyList())
     val context = LocalContext.current
+
+    LaunchedEffect(true) {
+        viewModel.fetchExpenses()
+    }
 
     Scaffold(
         topBar = {
@@ -111,6 +116,7 @@ fun ExpenseManagementScreen(
                                 amount = amount.toDouble(),
                                 date = date,
                                 onSuccess = {
+                                    viewModel.fetchExpenses()
                                     Toast.makeText(
                                         context,
                                         "Expense added successfully!",
@@ -134,9 +140,12 @@ fun ExpenseManagementScreen(
 
                 // Expense List
                 LazyColumn(
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize()
                 ) {
                     items(expenses) { expense ->
+                        println("print expense")
                         ExpenseRow(expense)
                     }
                 }
