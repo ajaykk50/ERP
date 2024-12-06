@@ -27,15 +27,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.erp.salespruchase.viewmodel.ProductViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductManagementScreen(
+    navController: NavController,
     viewModel:ProductViewModel = hiltViewModel()
 ) {
     val products by viewModel.products.collectAsState(emptyList())
+    val category by viewModel.category.collectAsState(emptyList())
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
+
     val context = LocalContext.current
 
     Scaffold(
@@ -43,7 +47,7 @@ fun ProductManagementScreen(
             TopAppBar(
                 title = { Text("Product Management") },
                 navigationIcon = {
-                    IconButton(onClick = { /* Handle back navigation */ }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -88,9 +92,12 @@ fun ProductManagementScreen(
 
         if (viewModel.isDialogOpen) {
             ProductDialog(
+                viewModel,
+                category,
+                selectedCategory,
                 initialProduct = viewModel.selectedProduct,
                 onDismiss = { viewModel.closeProductDialog() },
-                onSave = { product -> viewModel.saveProduct(product) }
+                onSave = { product -> viewModel.saveProduct(product) },
             )
         }
     }

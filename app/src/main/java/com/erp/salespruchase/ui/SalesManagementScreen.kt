@@ -30,12 +30,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.erp.salespruchase.SelectedProduct
 import com.erp.salespruchase.viewmodel.SalesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalesManagementScreen(
+    navController: NavController,
     viewModel: SalesViewModel = hiltViewModel()
 ) {
     val customers by viewModel.customers.collectAsState(emptyList())
@@ -55,7 +57,7 @@ fun SalesManagementScreen(
             TopAppBar(
                 title = { Text("Sales Management") },
                 navigationIcon = {
-                    IconButton(onClick = { /* Handle back navigation */ }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -87,26 +89,6 @@ fun SalesManagementScreen(
                         viewModel.selectCategory(category.find { it.name == name })
                     }
                 )
-
-                // Search Product
-                TextField(
-                    value = productSearchQuery,
-                    onValueChange = { viewModel.updateProductSearchQuery(it) },
-                    label = { Text("Search Product") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                // Product Dropdown based on search query
-                val filteredProducts = products.filter { it.name.contains(productSearchQuery, ignoreCase = true) }
-//                DropdownMenu(
-//                    label = "Select Product",
-//                    options = filteredProducts.map { it.name },
-//                    selectedOption = selectedProduct?.name ?: "",
-//                    onOptionSelected = { name ->
-//                        viewModel.selectProduct(filteredProducts.find { it.name == name })
-//                    }
-//                )
-
                 SearchableDropdownMenu(
                     label = "Select Product",
                     options = products.map { it.name },

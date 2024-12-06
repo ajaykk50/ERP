@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.erp.salespruchase.Expense
 import com.erp.salespruchase.viewmodel.ExpenseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,8 +51,8 @@ import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpenseManagementScreen(
-    viewModel: ExpenseViewModel = hiltViewModel()
+fun ExpenseManagementScreen(navController: NavController,
+                            viewModel: ExpenseViewModel = hiltViewModel()
 ) {
     val expenseCategories = listOf("Food", "Transport", "Utilities", "Entertainment", "Other")
     val selectedCategory by viewModel.selectedCategory.collectAsState("")
@@ -70,7 +71,7 @@ fun ExpenseManagementScreen(
             TopAppBar(
                 title = { Text("Expense Management") },
                 navigationIcon = {
-                    IconButton(onClick = { /* Handle back navigation */ }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }

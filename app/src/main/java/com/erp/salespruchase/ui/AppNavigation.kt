@@ -20,13 +20,13 @@ fun AppNavigation() {
                 onCategoryClick = { navController.navigate("category_management") }
             )
         }
-        composable("product_management") { ProductManagementScreen() }
-        composable("customer_management") { CustomerManagementScreen() }
-        composable("sales_management") { SalesManagementScreen() }
-        composable("vendor_management") { VendorManagementScreen() }
-        composable("purchase_management") { PurchaseManagementScreen() }
-        composable("expense_management") { ExpenseManagementScreen() }
-        composable("category_management") { ExpenseManagementScreen() }
+        composable("product_management") { ProductManagementScreen(navController) }
+        composable("customer_management") { CustomerManagementScreen(navController) }
+        composable("sales_management") { SalesManagementScreen(navController) }
+        composable("vendor_management") { VendorManagementScreen(navController) }
+        composable("purchase_management") { PurchaseManagementScreen(navController) }
+        composable("expense_management") { ExpenseManagementScreen(navController) }
+        composable("category_management") { CategoryManagementScreen(navController) }
 
 
     }

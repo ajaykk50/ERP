@@ -55,7 +55,7 @@ class SalesViewModel @Inject constructor(
     val saleItems: StateFlow<List<SaleItem>> = _saleItems
 
     val totalPrice = _saleItems.combine(_selectedProduct) { saleItems, selectedProduct ->
-        saleItems.sumOf { it.product.price * it.quantity } + (selectedProduct?.price ?: 0.0 * _quantity.value)
+        saleItems.sumOf { it.product.price * it.quantity }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, 0.0)
 
     fun selectCustomer(customer: Customer?) {

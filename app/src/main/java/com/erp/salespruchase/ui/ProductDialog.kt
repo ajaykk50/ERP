@@ -1,7 +1,6 @@
 package com.erp.salespruchase.ui
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,11 +14,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.erp.salespruchase.Category
 import com.erp.salespruchase.Product
+import com.erp.salespruchase.viewmodel.ProductViewModel
 import java.util.UUID
 
 @Composable
 fun ProductDialog(
+    viewModel: ProductViewModel,
+    category: List<Category>,
+    selectedCategory: Category?,
     initialProduct: Product?,
     onDismiss: () -> Unit,
     onSave: (Product) -> Unit
@@ -28,7 +32,7 @@ fun ProductDialog(
     val price = remember { mutableStateOf(initialProduct?.price ?: 0.0) }
     val stock = remember { mutableStateOf(initialProduct?.stock ?: 0) }
     val unit = remember { mutableStateOf(initialProduct?.unit ?: "") }
-    val category = remember { mutableStateOf(initialProduct?.category ?: "") }
+    //val category = remember { mutableStateOf(initialProduct?.category ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -68,11 +72,23 @@ fun ProductDialog(
                         label = { Text("Unit") }
                     )
                 }
+
+
+
                 item {
-                    TextField(
-                        value = category.value,
-                        onValueChange = { category.value = it },
-                        label = { Text("Category") }
+//                    TextField(
+//                        value = category.value,
+//                        onValueChange = { category.value = it },
+//                        label = { Text("Category") }
+//                    )
+
+                    DropdownMenu(
+                        label = "Select Category",
+                        options = category.map { it.name },
+                        selectedOption = selectedCategory?.name ?: "",
+                        onOptionSelected = { name ->
+                            viewModel.selectCategory(category.find { it.name == name })
+                        }
                     )
                 }
             }
@@ -85,7 +101,7 @@ fun ProductDialog(
                     price = price.value,
                     stock = stock.value,
                     unit = unit.value,
-                    category = category.value
+                    category = selectedCategory?.name?: ""
                 )
                 onSave(product)
                 onDismiss()

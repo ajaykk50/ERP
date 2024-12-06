@@ -12,7 +12,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -38,12 +40,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.erp.salespruchase.Vendor
 import com.erp.salespruchase.viewmodel.VendorViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VendorManagementScreen(viewModel: VendorViewModel = hiltViewModel()) {
+fun VendorManagementScreen(navController: NavController, viewModel: VendorViewModel = hiltViewModel()) {
     val vendors by viewModel.vendors.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
     var selectedVendor by remember { mutableStateOf<Vendor?>(null) }
@@ -54,7 +57,12 @@ fun VendorManagementScreen(viewModel: VendorViewModel = hiltViewModel()) {
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Vendor Management") })
+            TopAppBar(title = { Text("Vendor Management") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                })
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
@@ -115,6 +123,9 @@ fun VendorCard(vendor: Vendor, onEdit: (Vendor) -> Unit, onDelete: () -> Unit) {
                 Text(text = vendor.name, style = MaterialTheme.typography.titleSmall)
                 Text(text = vendor.phone, style = MaterialTheme.typography.bodySmall)
                 Text(text = vendor.address, style = MaterialTheme.typography.bodySmall)
+            }
+            IconButton(onClick = { onEdit(vendor) }) {
+                Icon(Icons.Default.Edit, contentDescription = "Edit Vendor")
             }
             IconButton(onClick = onDelete) {
                 Icon(Icons.Default.Delete, contentDescription = "Delete Vendor")

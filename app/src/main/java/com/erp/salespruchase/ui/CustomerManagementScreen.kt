@@ -27,11 +27,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.erp.salespruchase.viewmodel.CustomerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomerManagementScreen(
+    navController: NavController,
     viewModel: CustomerViewModel = hiltViewModel()
 ) {
     val customers by viewModel.customers.collectAsState(emptyList())
@@ -42,7 +44,7 @@ fun CustomerManagementScreen(
             TopAppBar(
                 title = { Text("Customer Management") },
                 navigationIcon = {
-                    IconButton(onClick = { /* Handle back navigation */ }) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 }

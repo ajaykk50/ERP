@@ -40,4 +40,20 @@ class CategoryRepository @Inject constructor(
         categoryRef.addValueEventListener(listener)
         awaitClose { categoryRef.removeEventListener(listener) }
     }
+
+    fun editCategory(categoryId: String, updatedCategory: Category, onSuccess: () -> Unit, onError: () -> Unit) {
+        categoryRef.child(categoryId).setValue(updatedCategory).addOnSuccessListener {
+            onSuccess()
+        }.addOnFailureListener {
+            onError()
+        }
+    }
+
+    fun deleteCategory(categoryId: String, onSuccess: () -> Unit, onError: () -> Unit) {
+        categoryRef.child(categoryId).removeValue().addOnSuccessListener {
+            onSuccess()
+        }.addOnFailureListener {
+            onError()
+        }
+    }
 }
