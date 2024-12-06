@@ -2,11 +2,13 @@ package com.erp.salespruchase.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.erp.salespruchase.Category
 import com.erp.salespruchase.Customer
 import com.erp.salespruchase.Product
 import com.erp.salespruchase.Sale
 import com.erp.salespruchase.SaleItem
 import com.erp.salespruchase.SelectedProduct
+import com.erp.salespruchase.repository.CategoryRepository
 import com.erp.salespruchase.repository.CustomerRepository
 import com.erp.salespruchase.repository.ProductRepository
 import com.erp.salespruchase.repository.SalesRepository
@@ -26,14 +28,19 @@ import javax.inject.Inject
 class SalesViewModel @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val productRepository: ProductRepository,
-    private val salesRepository: SalesRepository
+    private val salesRepository: SalesRepository,
+    private val categoryRepository: CategoryRepository
 ) : ViewModel() {
 
     val customers = customerRepository.getCustomers()
     val products = productRepository.getProducts()
+    val category = categoryRepository.getCategory()
 
     private val _selectedCustomer = MutableStateFlow<Customer?>(null)
     val selectedCustomer: StateFlow<Customer?> = _selectedCustomer
+
+    private val _selectedCategory = MutableStateFlow<Category?>(null)
+    val selectedCategory: StateFlow<Category?> = _selectedCategory
 
     private val _selectedProduct = MutableStateFlow<Product?>(null)
     val selectedProduct: StateFlow<Product?> = _selectedProduct
@@ -54,6 +61,11 @@ class SalesViewModel @Inject constructor(
     fun selectCustomer(customer: Customer?) {
         _selectedCustomer.value = customer
     }
+
+    fun selectCategory(category: Category?) {
+        _selectedCategory.value = category
+    }
+
 
     fun selectProduct(product: Product?) {
         _selectedProduct.value = product

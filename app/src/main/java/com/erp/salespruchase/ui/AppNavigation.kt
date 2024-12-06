@@ -16,7 +16,8 @@ fun AppNavigation() {
                 onSalesClick = { navController.navigate("sales_management") },
                 onPurchaseClick = { navController.navigate("purchase_management") },
                 onExpenseClick = { navController.navigate("expense_management") },
-                onVendorClick = { navController.navigate("vendor_management") }
+                onVendorClick = { navController.navigate("vendor_management") },
+                onCategoryClick = { navController.navigate("category_management") }
             )
         }
         composable("product_management") { ProductManagementScreen() }
@@ -25,6 +26,8 @@ fun AppNavigation() {
         composable("vendor_management") { VendorManagementScreen() }
         composable("purchase_management") { PurchaseManagementScreen() }
         composable("expense_management") { ExpenseManagementScreen() }
+        composable("category_management") { ExpenseManagementScreen() }
+
 
     }
 }

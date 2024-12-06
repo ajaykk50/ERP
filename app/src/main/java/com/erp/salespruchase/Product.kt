@@ -76,6 +76,11 @@ data class Expense(
     val date: Long = 0L
 )
 
+data class Category(
+    val id: String = "",
+    val name: String = "",
+)
+
 
 
 

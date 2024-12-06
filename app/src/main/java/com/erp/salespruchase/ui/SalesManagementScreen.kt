@@ -40,8 +40,10 @@ fun SalesManagementScreen(
 ) {
     val customers by viewModel.customers.collectAsState(emptyList())
     val products by viewModel.products.collectAsState(emptyList())
+    val category by viewModel.category.collectAsState(emptyList())
     val selectedCustomer by viewModel.selectedCustomer.collectAsState()
     val selectedProduct by viewModel.selectedProduct.collectAsState()
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
     val quantity by viewModel.quantity.collectAsState()
     val totalPrice by viewModel.totalPrice.collectAsState()
     val saleItems by viewModel.saleItems.collectAsState()
@@ -74,6 +76,15 @@ fun SalesManagementScreen(
                     selectedOption = selectedCustomer?.name ?: "",
                     onOptionSelected = { name ->
                         viewModel.selectCustomer(customers.find { it.name == name })
+                    }
+                )
+
+                DropdownMenu(
+                    label = "Select Category",
+                    options = category.map { it.name },
+                    selectedOption = selectedCategory?.name ?: "",
+                    onOptionSelected = { name ->
+                        viewModel.selectCategory(category.find { it.name == name })
                     }
                 )
 
