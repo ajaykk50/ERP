@@ -122,7 +122,7 @@ fun SalesManagementScreen(
                 // Sale Items Summary
                 Column(modifier = Modifier.fillMaxWidth()) {
                     saleItems.forEach { saleItem ->
-                        Text("${saleItem.product.name}: ${saleItem.quantity} x ${saleItem.product.price}")
+                        Text("${saleItem.product?.name}: ${saleItem.quantity} x ${saleItem.product?.price}")
                     }
                 }
 

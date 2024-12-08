@@ -39,4 +39,24 @@ class CustomerRepository @Inject constructor(
     fun deleteCustomer(customerId: String) {
         customerRef.child(customerId).removeValue()
     }
+
+    fun getCustomerById(customerId: String): Flow<Customer?> = callbackFlow {
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val customer = snapshot.getValue(Customer::class.java)
+                trySend(customer).isSuccess // Emit the Customer or null
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException()) // Close the flow in case of an error
+            }
+        }
+
+        // Query the specific customer node by ID
+        customerRef.child(customerId).addValueEventListener(listener)
+
+        // Clean up the listener when the flow is canceled
+        awaitClose { customerRef.child(customerId).removeEventListener(listener) }
+    }
+
 }

@@ -46,4 +46,26 @@ class ProductRepository @Inject constructor(
             .addOnFailureListener { onError(it) }
     }
 
+    fun getProductById(productId: String): Flow<Product?> = callbackFlow {
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                // Retrieve the product using the provided productId
+                val product = snapshot.getValue(Product::class.java)
+                trySend(product).isSuccess
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle errors if necessary
+                close(error.toException())
+            }
+        }
+
+        // Add a single value listener to fetch the product by ID
+        productRef.child(productId).addListenerForSingleValueEvent(listener)
+
+        // Ensure the listener is removed when the flow is closed
+        awaitClose { productRef.child(productId).removeEventListener(listener) }
+    }
+
+
 }

@@ -26,7 +26,8 @@ fun HomeScreen(
     onPurchaseClick: () -> Unit,
     onExpenseClick: () -> Unit,
     onVendorClick: () -> Unit,
-    onCategoryClick: () -> Unit
+    onCategoryClick: () -> Unit,
+    onSlesListClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -81,9 +82,18 @@ fun HomeScreen(
             item {
                 ManagementCard(
                     title = "Sales Management",
-                    description = "Create and track sales",
+                    description = "Create sales",
                     icon = Icons.Default.Person,
                     onClick = onSalesClick
+                )
+            }
+
+            item {
+                ManagementCard(
+                    title = "View Sales",
+                    description = "view sales",
+                    icon = Icons.Default.Person,
+                    onClick = onSlesListClick
                 )
             }
 

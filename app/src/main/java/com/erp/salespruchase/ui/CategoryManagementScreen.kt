@@ -1,10 +1,9 @@
 package com.erp.salespruchase.ui
 
-import android.app.DatePickerDialog
-import android.app.Dialog
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,211 +11,186 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.erp.salespruchase.Category
 import com.erp.salespruchase.viewmodel.CategoryViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
+import com.erp.salespruchase.viewmodel.CustomerViewModel
+import java.util.UUID
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryManagementScreen(
     navController: NavController,
     viewModel: CategoryViewModel = hiltViewModel()
 ) {
-    val categoryName by viewModel.categoryName.collectAsState("")
-    val categories by viewModel.categories.collectAsState(emptyList())
-    val editingCategory by viewModel.editingCategory.collectAsState(null)
+    val categories by viewModel.categories.collectAsState()
+    val categoryName by viewModel.categoryName.collectAsState()
+    val editingCategory by viewModel.editingCategory.collectAsState()
 
-    val context = LocalContext.current
+    var isDialogOpen by remember { mutableStateOf(false) }
 
-    LaunchedEffect(true) {
-        viewModel.fetchExpenses()
+    LaunchedEffect(Unit) {
+        viewModel.fetchCategory()
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Category Management") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        },
-        content = { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Expense Name
-                TextField(
-                    value = categoryName,
-                    onValueChange = { viewModel.setCategoryName(it) },
-                    label = { Text("Category Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                // Save Expense Button
-                Button(
-                    onClick = {
-                        if (categoryName.isNotEmpty()) {
-                            if (editingCategory == null) {
-                                viewModel.saveCategory(
-                                    name = categoryName,
-                                    onSuccess = {
-                                        viewModel.fetchExpenses()
-                                        Toast.makeText(
-                                            context,
-                                            "Category added successfully!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    },
-                                    onError = {
-                                        Toast.makeText(
-                                            context,
-                                            "Error adding expense",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                )
-                            } else {
-                                viewModel.editCategory(
-
-                                    category = editingCategory.copy(name = categoryName),
-                                    onSuccess = {
-                                        viewModel.fetchExpenses()
-                                        Toast.makeText(
-                                            context,
-                                            "Category updated successfully!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    },
-                                    onError = {
-                                        Toast.makeText(
-                                            context,
-                                            "Error updating category",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                )
-                            }
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Save Category")
-                }
-
-                // Expense List
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                ) {
-                    items(categories) { category ->
-                        CategoryRow(category,
-                            onEdit = { selectedCategory ->
-                                viewModel.setEditingCategory(selectedCategory)
-                                // Open a dialog or navigate to an edit screen
-//                                viewModel.editCategory(
-//                                    categoryId = selectedCategory.id,
-//                                    updatedCategory = selectedCategory.copy(name = selectedCategory.name),
-//                                    onSuccess = {
-//                                        Toast.makeText(context, "Category updated!", Toast.LENGTH_SHORT).show()
-//                                    },
-//                                    onError = {
-//                                        Toast.makeText(context, "Failed to update category", Toast.LENGTH_SHORT).show()
-//                                    }
-//                                )
-                            },
-                            onDelete = { selectedCategory ->
-                                viewModel.deleteCategory(
-                                    categoryId = selectedCategory.id,
-                                    onSuccess = {
-                                        viewModel.fetchExpenses()
-                                        Toast.makeText(
-                                            context,
-                                            "Category deleted!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    },
-                                    onError = {
-                                        Toast.makeText(
-                                            context,
-                                            "Failed to delete category",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                )
-                            })
-                    }
-                }
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                viewModel.clearEditingState()
+                isDialogOpen = true
+            }) {
+                Icon(Icons.Default.Add, contentDescription = "Add Category")
             }
         }
-    )
-}
-
-@Composable
-fun CategoryRow(
-    category: Category, onEdit: (Category) -> Unit,
-    onDelete: (Category) -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            Text(
-                text = "Category Name: ${category.name}",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Row(
-                horizontalArrangement = Arrangement.End,
-                modifier = Modifier.fillMaxWidth()
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp)
             ) {
-                IconButton(onClick = { onEdit(category) }) {
-                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
-                }
-                IconButton(onClick = { onDelete(category) }) {
-                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete")
+                items(categories) { category ->
+                    CategoryItem(
+                        category = category,
+                        onEditClick = {
+                            viewModel.setEditingCategory(category)
+                            isDialogOpen = true
+                        },
+                        onDeleteClick = {
+                            viewModel.deleteCategory(
+                                categoryId = category.id,
+                                onSuccess = { /* Success handling */ },
+                                onError = { /* Error handling */ }
+                            )
+                        }
+                    )
                 }
             }
         }
     }
+
+    if (isDialogOpen) {
+        CategoryDialog(
+            categoryName = categoryName,
+            onCategoryNameChange = { viewModel.setCategoryName(it) },
+            onSave = {
+                if (editingCategory == null) {
+                    viewModel.saveCategory(
+                        id = UUID.randomUUID().toString(),
+                        name = categoryName,
+                        onSuccess = {
+                            isDialogOpen = false
+                        },
+                        onError = { /* Error handling */ }
+                    )
+                } else {
+                    editingCategory?.id?.let {
+                        editingCategory?.copy(name = categoryName)?.let { it1 ->
+                            viewModel.editCategory(
+                                categoryId = it,
+                                updatedCategory = it1,
+                                onSuccess = {
+                                    isDialogOpen = false
+                                    viewModel.clearEditingState()
+                                    viewModel.fetchCategory()
+                                },
+                                onError = { /* Error handling */ }
+                            )
+                        }
+                    }
+                }
+            },
+            onDismiss = { isDialogOpen = false }
+        )
+    }
+}
+
+@Composable
+fun CategoryItem(category: Category, onEditClick: () -> Unit, onDeleteClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = category.name, style = MaterialTheme.typography.bodyMedium)
+
+            Row {
+                IconButton(onClick = onEditClick) {
+                    Icon(Icons.Default.Edit, contentDescription = "Edit Category")
+                }
+                IconButton(onClick = onDeleteClick) {
+                    Icon(Icons.Default.Delete, contentDescription = "Delete Category")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoryDialog(
+    categoryName: String,
+    onCategoryNameChange: (String) -> Unit,
+    onSave: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = { Text("Category") },
+        text = {
+            Column {
+                TextField(
+                    value = categoryName,
+                    onValueChange = onCategoryNameChange,
+                    label = { Text("Category Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = onSave) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

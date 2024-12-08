@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.erp.salespruchase.Category
 import com.erp.salespruchase.Customer
+import com.erp.salespruchase.DisplaySale
+import com.erp.salespruchase.DisplaySaleItem
 import com.erp.salespruchase.Product
 import com.erp.salespruchase.Sale
 import com.erp.salespruchase.SaleItem
@@ -54,8 +56,56 @@ class SalesViewModel @Inject constructor(
     private val _saleItems = MutableStateFlow<List<SaleItem>>(emptyList())
     val saleItems: StateFlow<List<SaleItem>> = _saleItems
 
+
+    private val _allSales = MutableStateFlow<List<DisplaySale>>(emptyList())
+    val allSales: StateFlow<List<DisplaySale>> = _allSales
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
+
+    val filteredSales: StateFlow<List<DisplaySale>> = searchQuery
+        .combine(_allSales) { query, sales ->
+            if (query.isBlank()) sales
+            else sales.filter { sale ->
+                sale.customerName.contains(query, ignoreCase = true) ||
+                        sale.saleItems.any { it.productName.contains(query, ignoreCase = true) }
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+
+    fun fetchAllSales() {
+        viewModelScope.launch {
+            salesRepository.getAllSales().collect { sales ->
+                val displaySales = sales.map { sale ->
+                    val customer = customerRepository.getCustomerById(sale.customerId).firstOrNull()
+                    DisplaySale(
+                        id = sale.id,
+                        customerName = customer?.name ?: "Unknown",
+                        saleItems = sale.saleItems.map { saleItem ->
+                            val product =
+                                saleItem.product?.id?.let { productRepository.getProductById(it).firstOrNull() }
+                            DisplaySaleItem(
+                                productName = product?.name ?: "Unknown",
+                                quantity = saleItem.quantity
+                            )
+                        },
+                        totalAmount = sale.totalAmount,
+                        date = sale.date
+                    )
+                }
+                _allSales.value = displaySales
+            }
+        }
+    }
+
+
     val totalPrice = _saleItems.combine(_selectedProduct) { saleItems, selectedProduct ->
-        saleItems.sumOf { it.product.price * it.quantity }
+        saleItems.sumOf { it.product?.price!! * it.quantity }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, 0.0)
 
     fun selectCustomer(customer: Customer?) {
@@ -88,12 +138,14 @@ class SalesViewModel @Inject constructor(
         val customer = _selectedCustomer.value
         val saleItems = _saleItems.value
         if (customer != null && saleItems.isNotEmpty()) {
+
+
             val saleId = UUID.randomUUID().toString()
             val sale = Sale(
                 id = saleId,
                 customerId = customer.id,
-                saleItems = saleItems.map { it.product.id to it.quantity },
-                totalAmount = saleItems.sumOf { it.product.price * it.quantity },
+                saleItems =saleItems,
+                totalAmount = saleItems.sumOf { it.product?.price!! * it.quantity },
                 date = System.currentTimeMillis()
             )
 
@@ -101,7 +153,7 @@ class SalesViewModel @Inject constructor(
             salesRepository.addSales(sale, onSuccess = {
                 // Update product stock after sale
                 saleItems.forEach { saleItem ->
-                    productRepository.updateStock(saleItem.product.id, saleItem.product.stock - saleItem.quantity)
+                    saleItem.product?.id?.let { productRepository.updateStock(it, saleItem.product.stock - saleItem.quantity) }
                 }
                 onSuccess()
             }, onError)

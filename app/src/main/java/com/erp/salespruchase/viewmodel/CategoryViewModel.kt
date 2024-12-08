@@ -50,20 +50,21 @@ class CategoryViewModel @Inject constructor(
     }
 
 
-
     // Save expense to the repository
     fun saveCategory(
+        id: String,
         name: String,
         onSuccess: () -> Unit,
         onError: () -> Unit
     ) {
         val category = Category(
+            id = id,
             name = name
         )
         categoryRepository.addCategory(category, onSuccess, onError)
     }
 
-    fun fetchExpenses() {
+    fun fetchCategory() {
         viewModelScope.launch {
             categoryRepository.getCategory().collectLatest {
                 _categories.value = it

@@ -26,15 +26,28 @@ data class Customer(
 //    val date: Long = 0L
 //)
 
+//data class SaleItem(
+//    val product: Product,
+//    val quantity: Int
+//)
+
+//data class Sale(
+//    val id: String = "",
+//    val customerId: String = "",
+//    val saleItems: List<Pair<String, Int>> = listOf(),
+//    val totalAmount: Double = 0.0,
+//    val date: Long = 0L
+//)
+
 data class SaleItem(
-    val product: Product,
-    val quantity: Int
+    val product: Product? = null, // Use nullable Product with a default value
+    val quantity: Int = 0
 )
 
 data class Sale(
     val id: String = "",
     val customerId: String = "",
-    val saleItems: List<Pair<String, Int>> = listOf(),
+    val saleItems: List<SaleItem> = listOf(),
     val totalAmount: Double = 0.0,
     val date: Long = 0L
 )
@@ -79,6 +92,19 @@ data class Expense(
 data class Category(
     val id: String = "",
     val name: String = "",
+)
+
+data class DisplaySale(
+    val id: String,
+    val customerName: String,
+    val saleItems: List<DisplaySaleItem>,
+    val totalAmount: Double,
+    val date: Long
+)
+
+data class DisplaySaleItem(
+    val productName: String,
+    val quantity: Int
 )
 
 

@@ -20,7 +20,7 @@ class CategoryRepository @Inject constructor(
 
     // Save expense to Firebase
     fun addCategory(category: Category, onSuccess: () -> Unit, onError: () -> Unit) {
-        categoryRef.push().setValue(category).addOnSuccessListener {
+        categoryRef.child(category.id).setValue(category).addOnSuccessListener {
             onSuccess()
         }.addOnFailureListener {
             onError()
