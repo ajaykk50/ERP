@@ -1,5 +1,6 @@
 package com.erp.salespruchase.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -38,6 +40,7 @@ fun ViewAllSalesScreen(
 ) {
     val allSales by viewModel.allSales.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val filteredSales by viewModel.filteredSales.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.fetchAllSales()
@@ -55,25 +58,24 @@ fun ViewAllSalesScreen(
             )
         },
         content = { padding ->
-            Column {
-
+            Column(
+                modifier = Modifier.fillMaxSize().padding(padding)
+            ) {
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = viewModel::updateSearchQuery,
                     label = { Text("Search Sales") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(16.dp)
                 )
-
-
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
+                        .fillMaxWidth()
+                        .weight(1f)
                         .padding(16.dp)
                 ) {
-                    items(allSales) { sale ->
+                    items(filteredSales) { sale ->
                         SaleItemCard(sale)
                     }
                 }
