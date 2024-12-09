@@ -79,19 +79,19 @@ fun HomeScreen(
             }
 
 
-            item {
-                ManagementCard(
-                    title = "Sales Management",
-                    description = "Create sales",
-                    icon = Icons.Default.Person,
-                    onClick = onSalesClick
-                )
-            }
+//            item {
+//                ManagementCard(
+//                    title = "Sales Management",
+//                    description = "Create sales",
+//                    icon = Icons.Default.Person,
+//                    onClick = onSalesClick
+//                )
+//            }
 
             item {
                 ManagementCard(
-                    title = "View Sales",
-                    description = "view sales",
+                    title = "Sales Management",
+                    description = "Add and view sales",
                     icon = Icons.Default.Person,
                     onClick = onSlesListClick
                 )
