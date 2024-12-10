@@ -47,8 +47,11 @@ class SalesViewModel @Inject constructor(
     private val _selectedProduct = MutableStateFlow<Product?>(null)
     val selectedProduct: StateFlow<Product?> = _selectedProduct
 
-    private val _quantity = MutableStateFlow(0)
-    val quantity: StateFlow<Int> = _quantity
+    private val _quantity = MutableStateFlow("0")
+    val quantity: StateFlow<String> = _quantity
+
+    private val _price = MutableStateFlow("0")
+    val price: StateFlow<String> = _price
 
     private val _productSearchQuery = MutableStateFlow("")
     val productSearchQuery: StateFlow<String> = _productSearchQuery
@@ -88,7 +91,9 @@ class SalesViewModel @Inject constructor(
                         customerName = customer?.name ?: "Unknown",
                         saleItems = sale.saleItems.map { saleItem ->
                             val product =
-                                saleItem.product?.id?.let { productRepository.getProductById(it).firstOrNull() }
+                                saleItem.product?.id?.let {
+                                    productRepository.getProductById(it).firstOrNull()
+                                }
                             DisplaySaleItem(
                                 productName = product?.name ?: "Unknown",
                                 quantity = saleItem.quantity
@@ -105,7 +110,11 @@ class SalesViewModel @Inject constructor(
 
 
     val totalPrice = _saleItems.combine(_selectedProduct) { saleItems, selectedProduct ->
-        saleItems.sumOf { it.product?.price!! * it.quantity }
+        if (_price.value.toDouble() > 0.0) {
+            saleItems.sumOf { _price.value.toDouble() * it.quantity.toDouble() }
+        } else {
+            saleItems.sumOf { it.product?.price?.toDouble()!! * it.quantity.toDouble() }
+        }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, 0.0)
 
     fun selectCustomer(customer: Customer?) {
@@ -121,15 +130,19 @@ class SalesViewModel @Inject constructor(
         _selectedProduct.value = product
     }
 
-    fun updateQuantity(newQuantity: Int) {
+    fun updateQuantity(newQuantity: String) {
         _quantity.value = newQuantity
+    }
+
+    fun updatePrice(price: String) {
+        _price.value = price
     }
 
     fun updateProductSearchQuery(query: String) {
         _productSearchQuery.value = query
     }
 
-    fun addProductToSale(product: Product, quantity: Int) {
+    fun addProductToSale(product: Product, quantity: String) {
         val newSaleItem = SaleItem(product, quantity)
         _saleItems.value = _saleItems.value + newSaleItem
     }
@@ -144,8 +157,9 @@ class SalesViewModel @Inject constructor(
             val sale = Sale(
                 id = saleId,
                 customerId = customer.id,
-                saleItems =saleItems,
-                totalAmount = saleItems.sumOf { it.product?.price!! * it.quantity },
+                saleItems = saleItems,
+                totalAmount = saleItems.sumOf { it.product?.price?.toDouble()!! * it.quantity.toDouble() }
+                    .toString(),
                 date = System.currentTimeMillis()
             )
 
@@ -153,12 +167,27 @@ class SalesViewModel @Inject constructor(
             salesRepository.addSales(sale, onSuccess = {
                 // Update product stock after sale
                 saleItems.forEach { saleItem ->
-                    saleItem.product?.id?.let { productRepository.updateStock(it, saleItem.product.stock - saleItem.quantity) }
+                    saleItem.product?.id?.let {
+                        productRepository.updateStock(
+                            it,
+                            (saleItem.product.stock.toDouble() - saleItem.quantity.toDouble()).toString()
+                        )
+                    }
                 }
                 onSuccess()
             }, onError)
         } else {
             onError()
+        }
+    }
+
+    fun deleteSale(saleId: String) {
+        viewModelScope.launch {
+            salesRepository.deleteSale(saleId) {
+                if (it) {
+                    fetchAllSales() // Refresh the list
+                }
+            }
         }
     }
 }

@@ -47,6 +47,7 @@ fun SalesManagementScreen(
     val selectedProduct by viewModel.selectedProduct.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val quantity by viewModel.quantity.collectAsState()
+    val price by viewModel.price.collectAsState()
     val totalPrice by viewModel.totalPrice.collectAsState()
     val saleItems by viewModel.saleItems.collectAsState()
     val productSearchQuery by viewModel.productSearchQuery.collectAsState()
@@ -81,14 +82,14 @@ fun SalesManagementScreen(
                     }
                 )
 
-                DropdownMenu(
-                    label = "Select Category",
-                    options = category.map { it.name },
-                    selectedOption = selectedCategory?.name ?: "",
-                    onOptionSelected = { name ->
-                        viewModel.selectCategory(category.find { it.name == name })
-                    }
-                )
+//                DropdownMenu(
+//                    label = "Select Category",
+//                    options = category.map { it.name },
+//                    selectedOption = selectedCategory?.name ?: "",
+//                    onOptionSelected = { name ->
+//                        viewModel.selectCategory(category.find { it.name == name })
+//                    }
+//                )
                 SearchableDropdownMenu(
                     label = "Select Product",
                     options = products.map { it.name },
@@ -100,9 +101,18 @@ fun SalesManagementScreen(
 
                 // Enter Quantity
                 TextField(
-                    value = quantity.toString(),
-                    onValueChange = { viewModel.updateQuantity(it.toIntOrNull() ?: 0) },
+                    value = quantity,
+                    onValueChange = { viewModel.updateQuantity(it) },
                     label = { Text("Enter Quantity") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // Enter Price
+                TextField(
+                    value =price,
+                    onValueChange = { viewModel.updatePrice(it) },
+                    label = { Text("Enter Price") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -122,7 +132,7 @@ fun SalesManagementScreen(
                 // Sale Items Summary
                 Column(modifier = Modifier.fillMaxWidth()) {
                     saleItems.forEach { saleItem ->
-                        Text("${saleItem.product?.name}: ${saleItem.quantity} x ${saleItem.product?.price}")
+                        Text("${saleItem.product?.name}: ${saleItem.quantity} x ${price}")
                     }
                 }
 
@@ -138,10 +148,15 @@ fun SalesManagementScreen(
                     onClick = {
                         viewModel.saveSale(
                             onSuccess = {
-                                Toast.makeText(context, "Sale saved successfully", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "Sale saved successfully",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             },
                             onError = {
-                                Toast.makeText(context, "Error saving sale", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Error saving sale", Toast.LENGTH_SHORT)
+                                    .show()
                             }
                         )
                     },

@@ -1,5 +1,6 @@
 package com.erp.salespruchase.repository
 
+import com.erp.salespruchase.Expense
 import com.erp.salespruchase.Sale
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -33,10 +34,16 @@ class SalesRepository @Inject constructor(
                     close(error.toException())
                 }
             }
-
             salesRef.orderByKey().addValueEventListener(listener)
             awaitClose { salesRef.removeEventListener(listener) }
         }
     }
 
+    fun deleteSale(saleId: String, callback: (Boolean) -> Unit) {
+        salesRef.child(saleId).removeValue().addOnSuccessListener {
+            callback(true)
+        }.addOnFailureListener {
+            callback(false)
+        }
+    }
 }

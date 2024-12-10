@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,15 +51,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpenseManagementScreen(navController: NavController,
-                            viewModel: ExpenseViewModel = hiltViewModel()
+fun ExpenseManagementScreen(
+    navController: NavController,
+    viewModel: ExpenseViewModel = hiltViewModel()
 ) {
     val expenseCategories = listOf("Food", "Transport", "Utilities", "Entertainment", "Other")
     val selectedCategory by viewModel.selectedCategory.collectAsState("")
     val expenseName by viewModel.expenseName.collectAsState("")
+    val expenseId by viewModel.expenseId.collectAsState(null)
     val amount by viewModel.amount.collectAsState("")
     val date by viewModel.date.collectAsState(0L)
     val expenses by viewModel.expenses.collectAsState(emptyList())
@@ -112,26 +118,36 @@ fun ExpenseManagementScreen(navController: NavController,
                 Button(
                     onClick = {
                         if (expenseName.isNotEmpty() && amount.isNotEmpty()) {
-                            viewModel.saveExpense(
-                                name = expenseName,
-                                amount = amount.toDouble(),
-                                date = date,
-                                onSuccess = {
-                                    viewModel.fetchExpenses()
-                                    Toast.makeText(
-                                        context,
-                                        "Expense added successfully!",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                },
-                                onError = {
-                                    Toast.makeText(
-                                        context,
-                                        "Error adding expense",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            )
+                            if (!expenseId.isNullOrEmpty()) {
+                                val expense = Expense(
+                                    id = expenseId.toString(),
+                                    name = expenseName,
+                                    amount = amount.toDouble(),
+                                    date = date,
+                                )
+                                viewModel.updateExpense(expense)
+                            } else {
+                                viewModel.saveExpense(
+                                    name = expenseName,
+                                    amount = amount.toDouble(),
+                                    date = date,
+                                    onSuccess = {
+                                        viewModel.fetchExpenses()
+                                        Toast.makeText(
+                                            context,
+                                            "Expense added successfully!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    },
+                                    onError = {
+                                        Toast.makeText(
+                                            context,
+                                            "Error adding expense",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                )
+                            }
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -146,8 +162,9 @@ fun ExpenseManagementScreen(navController: NavController,
                         .fillMaxSize()
                 ) {
                     items(expenses) { expense ->
-                        println("print expense")
-                        ExpenseRow(expense)
+                        ExpenseRow(expense,
+                            onDelete = { viewModel.deleteExpense(it) },
+                            onEdit = { viewModel.editExpense(it) })
                     }
                 }
             }
@@ -156,7 +173,7 @@ fun ExpenseManagementScreen(navController: NavController,
 }
 
 @Composable
-fun ExpenseRow(expense: Expense) {
+fun ExpenseRow(expense: Expense, onDelete: (Expense) -> Unit, onEdit: (Expense) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -175,6 +192,15 @@ fun ExpenseRow(expense: Expense) {
                 text = "Date: ${SimpleDateFormat("yyyy-MM-dd").format(Date(expense.date))}",
                 style = MaterialTheme.typography.titleSmall
             )
+
+            Row(horizontalArrangement = Arrangement.End) {
+                IconButton(onClick = { onEdit(expense) }) {
+                    Icon(Icons.Default.Edit, contentDescription = "Edit Expense")
+                }
+                IconButton(onClick = { onDelete(expense) }) {
+                    Icon(Icons.Default.Delete, contentDescription = "Delete Expense")
+                }
+            }
         }
     }
 }

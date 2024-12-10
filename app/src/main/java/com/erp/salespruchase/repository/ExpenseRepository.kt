@@ -12,7 +12,8 @@ class ExpenseRepository @Inject constructor(
 
     // Save expense to Firebase
     fun addExpense(expense: Expense, onSuccess: () -> Unit, onError: () -> Unit) {
-        expenseRef.push().setValue(expense).addOnSuccessListener {
+        val expenseId = expenseRef.push().key ?: return
+        expenseRef.child(expenseId).setValue(expense.copy(id = expenseId)).addOnSuccessListener {
             onSuccess()
         }.addOnFailureListener {
             onError()
@@ -28,4 +29,23 @@ class ExpenseRepository @Inject constructor(
             callback(emptyList())
         }
     }
+
+    fun deleteExpense(expense: Expense, callback: (Boolean) -> Unit) {
+        expenseRef.child(expense.id).removeValue().addOnSuccessListener {
+            callback(true)
+        }.addOnFailureListener {
+            callback(false)
+        }
+    }
+
+    fun updateExpense(expense: Expense, callback: (Boolean) -> Unit) {
+        val expenseId = expense.id ?: return
+        expenseRef.child(expenseId).setValue(expense).addOnSuccessListener {
+            callback(true)
+        }.addOnFailureListener {
+            callback(false)
+        }
+    }
+
+
 }

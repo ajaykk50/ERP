@@ -29,8 +29,8 @@ fun ProductDialog(
     onSave: (Product) -> Unit
 ) {
     val name = remember { mutableStateOf(initialProduct?.name ?: "") }
-    val price = remember { mutableStateOf(initialProduct?.price ?: 0.0) }
-    val stock = remember { mutableStateOf(initialProduct?.stock ?: 0) }
+    val price = remember { mutableStateOf(initialProduct?.price ?: "") }
+    val stock = remember { mutableStateOf(initialProduct?.stock ?: "") }
     val unit = remember { mutableStateOf(initialProduct?.unit ?: "") }
     //val category = remember { mutableStateOf(initialProduct?.category ?: "") }
 
@@ -51,16 +51,16 @@ fun ProductDialog(
                 }
                 item {
                     TextField(
-                        value = price.value.toString(),
-                        onValueChange = { price.value = it.toDoubleOrNull() ?: 0.0 },
+                        value = price.value,
+                        onValueChange = { price.value = it },
                         label = { Text("Price") },
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
                     )
                 }
                 item {
                     TextField(
-                        value = stock.value.toString(),
-                        onValueChange = { stock.value = it.toIntOrNull() ?: 0 },
+                        value = stock.value,
+                        onValueChange = { stock.value = it},
                         label = { Text("Stock") },
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
                     )
@@ -101,7 +101,7 @@ fun ProductDialog(
                     price = price.value,
                     stock = stock.value,
                     unit = unit.value,
-                    category = selectedCategory?.name?: ""
+                    category = selectedCategory?.name ?: ""
                 )
                 onSave(product)
                 onDismiss()

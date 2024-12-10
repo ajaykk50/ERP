@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
+import kotlin.math.exp
 
 @HiltViewModel
 class ExpenseViewModel @Inject constructor(
@@ -19,6 +20,9 @@ class ExpenseViewModel @Inject constructor(
 
     private val _expenseName = MutableStateFlow("")
     val expenseName: StateFlow<String> = _expenseName
+
+    private val _expenseId = MutableStateFlow("")
+    val expenseId: StateFlow<String> = _expenseId
 
     private val _amount = MutableStateFlow("")
     val amount: StateFlow<String> = _amount
@@ -66,6 +70,29 @@ class ExpenseViewModel @Inject constructor(
     fun fetchExpenses() {
         expenseRepository.getExpenses { expenses ->
             _expenses.value = expenses
+        }
+    }
+
+    fun deleteExpense(expense: Expense) {
+        expenseRepository.deleteExpense(expense) { success ->
+            if (success) {
+                fetchExpenses()
+            }
+        }
+    }
+
+    fun editExpense(expense: Expense) {
+        _expenseName.value = expense.name
+        _amount.value = expense.amount.toString()
+        _date.value = expense.date
+        _expenseId.value = expense.id
+    }
+
+    fun updateExpense(expense: Expense) {
+        expenseRepository.updateExpense(expense) { success ->
+            if (success) {
+                fetchExpenses()
+            }
         }
     }
 }
