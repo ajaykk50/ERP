@@ -1,5 +1,8 @@
 package com.erp.salespruchase
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 data class Product(
     val id: String = "",
     val name: String = "",
@@ -41,7 +44,8 @@ data class Customer(
 
 data class SaleItem(
     val product: Product? = null, // Use nullable Product with a default value
-    val quantity: String = ""
+    val quantity: String = "",
+    val price: String = ""
 )
 
 data class Sale(
@@ -94,18 +98,21 @@ data class Category(
     val name: String = "",
 )
 
+@Parcelize
 data class DisplaySale(
     val id: String,
     val customerName: String,
     val saleItems: List<DisplaySaleItem>,
     val totalAmount: String,
     val date: Long
-)
+) : Parcelable
 
+@Parcelize
 data class DisplaySaleItem(
     val productName: String,
-    val quantity: String = ""
-)
+    val quantity: String = "",
+    val price: String
+) : Parcelable
 
 
 

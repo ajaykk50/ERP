@@ -3,16 +3,12 @@ package com.erp.salespruchase.ui
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -31,14 +27,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.erp.salespruchase.SelectedProduct
+import com.erp.salespruchase.DisplaySale
 import com.erp.salespruchase.viewmodel.SalesViewModel
+import com.erp.salespruchase.viewmodel.SharedViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalesManagementScreen(
     navController: NavController,
-    viewModel: SalesViewModel = hiltViewModel()
+    sharedViewModel: SharedViewModel = hiltViewModel(),
+    viewModel: SalesViewModel = hiltViewModel(),
 ) {
     val customers by viewModel.customers.collectAsState(emptyList())
     val products by viewModel.products.collectAsState(emptyList())
@@ -52,6 +50,8 @@ fun SalesManagementScreen(
     val saleItems by viewModel.saleItems.collectAsState()
     val productSearchQuery by viewModel.productSearchQuery.collectAsState()
     val context = LocalContext.current
+
+    println("sharedViewModel.displaySale" + sharedViewModel.displaySale)
 
     Scaffold(
         topBar = {
@@ -82,14 +82,6 @@ fun SalesManagementScreen(
                     }
                 )
 
-//                DropdownMenu(
-//                    label = "Select Category",
-//                    options = category.map { it.name },
-//                    selectedOption = selectedCategory?.name ?: "",
-//                    onOptionSelected = { name ->
-//                        viewModel.selectCategory(category.find { it.name == name })
-//                    }
-//                )
                 SearchableDropdownMenu(
                     label = "Select Product",
                     options = products.map { it.name },
@@ -98,7 +90,6 @@ fun SalesManagementScreen(
                         viewModel.selectProduct(products.find { it.name == name })
                     }
                 )
-
                 // Enter Quantity
                 TextField(
                     value = quantity,
@@ -110,7 +101,7 @@ fun SalesManagementScreen(
 
                 // Enter Price
                 TextField(
-                    value =price,
+                    value = price,
                     onValueChange = { viewModel.updatePrice(it) },
                     label = { Text("Enter Price") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -121,7 +112,7 @@ fun SalesManagementScreen(
                 Button(
                     onClick = {
                         selectedProduct?.let { product ->
-                            viewModel.addProductToSale(product, quantity)
+                            viewModel.addProductToSale(product, quantity, price = price)
                         }
                     },
                     modifier = Modifier.fillMaxWidth()

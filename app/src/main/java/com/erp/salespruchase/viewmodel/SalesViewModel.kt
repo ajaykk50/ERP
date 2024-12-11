@@ -96,7 +96,8 @@ class SalesViewModel @Inject constructor(
                                 }
                             DisplaySaleItem(
                                 productName = product?.name ?: "Unknown",
-                                quantity = saleItem.quantity
+                                quantity = saleItem.quantity,
+                                price = saleItem.price
                             )
                         },
                         totalAmount = sale.totalAmount,
@@ -142,8 +143,8 @@ class SalesViewModel @Inject constructor(
         _productSearchQuery.value = query
     }
 
-    fun addProductToSale(product: Product, quantity: String) {
-        val newSaleItem = SaleItem(product, quantity)
+    fun addProductToSale(product: Product, quantity: String, price: String) {
+        val newSaleItem = SaleItem(product, quantity, price)
         _saleItems.value = _saleItems.value + newSaleItem
     }
 
